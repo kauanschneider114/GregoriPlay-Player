@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title id="page-title">Assistir | Doramas VIP</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: #000;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 20px;
+      overflow: hidden;
+    }
+
+    .bg-layer {
+      position: fixed;
+      inset: 0;
+      background: url('imagens/bg-dorama.jpg') center/cover no-repeat fixed;
+      filter: brightness(0.25) blur(3px);
+      z-index: -3;
+    }
+
+    .overlay-dark {
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(circle at center, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.95) 90%);
+      z-index: -2;
+    }
+
+    .header-player {
+    font-family: 'Poppins', sans-serif;
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin-bottom: 18px;
+    text-align: center;
+}
+
+.header-player .gregori {
+    color: #ffffff;
+    text-shadow:
+        0 0 3px rgba(255,255,255,0.2),
+        0 0 6px rgba(255,255,255,0.15);
+}
+
+.header-player .play {
+    color: #1e90ff;
+    margin-left: 3px;
+    text-shadow:
+        0 0 3px rgba(30,144,255,0.3),
+        0 0 8px rgba(30,144,255,0.20);
+}
+
+/* Ajuste mobile */
+@media (max-width: 480px) {
+    .header-player {
+        font-size: 1.4rem;
+        margin-bottom: 12px;
+    }
+}
+
+    #player-wrapper {
+      position: relative;
+      width: 350px;
+      height: 763px;
+      background-color: #000;
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 0 60px rgba(30,144,255,0.25);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 5;
+    }
+
+    @media (min-width: 900px) {
+      #player-wrapper {
+        width: 450px;
+        height: calc(450px * (615 / 282));
+        max-height: 85vh;
+      }
+    }
+
+    iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      background: #000;
+      opacity: 0;
+      transition: opacity 350ms ease;
+      display: block;
+    }
+
+    #loader {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      color: #fff;
+      font-size: 1rem;
+      font-weight: 600;
+      z-index: 60;
+      pointer-events: none;
+    }
+
+    #loader::after {
+      content: "";
+      width: 38px;
+      height: 38px;
+      border: 3px solid rgba(255,255,255,0.25);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin { 100% { transform: rotate(360deg); } }
+
+    .erro-expiracao {
+      margin-top: 25px;
+      font-size: 1.05rem;
+      color: #ff5555;
+      background-color: rgba(255,85,85,0.1);
+      border: 1px solid #ff5555;
+      padding: 12px 18px;
+      border-radius: 8px;
+      text-align: center;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="bg-layer"></div>
+  <div class="overlay-dark"></div>
+
+  <div class="header-player">
+    <span class="gregori">Gregori</span><span class="play">Play</span>
+</div>
+
+  <div id="player-wrapper">
+    <div id="loader"><span>Carregando vídeo...</span></div>
+    <iframe id="vimeo-iframe" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>
+  </div>
+
+  <p id="mensagem-erro" class="erro-expiracao">⚠️ Link expirado! Solicite um novo link.</p>
+
+  <script src="https://player.vimeo.com/api/player.js"></script>
+  <script>
+
+    // ======================
+    //  SEGURANÇA DO LINK
+    // ======================
+
+    const SEGREDO = "gregoriPlay123456"; // MESMO DO INDEX
+
+    function getQueryParams() {
+      const urlParams = new URLSearchParams(window.location.search);
+      return {
+        vimeo_id: urlParams.get('vimeo_id'),
+        expira: urlParams.get('expira'),
+        key: urlParams.get('key')
+      };
+    }
+
+    async function gerarHash(texto) {
+      const msgBuffer = new TextEncoder().encode(texto);
+      const hashBuffer = await crypto.subtle.digest("SHA-256", msgBuffer);
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+      return hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
+    }
+
+    async function validarHash(vimeoId, expira, keyRecebido) {
+      if (!keyRecebido) return false;
+      const textoHash = `${vimeoId}|${expira}|${SEGREDO}`;
+      const hashCorreto = await gerarHash(textoHash);
+      return (hashCorreto === keyRecebido);
+    }
+
+
+    // ======================
+    //  PLAYER ORIGINAL
+    // ======================
+
+    async function iniciarPlayer() {
+      const params = getQueryParams();
+      const vimeoId = params.vimeo_id;
+      const tempoExpiracao = parseInt(params.expira);
+      const agora = Date.now();
+
+      const iframeElement = document.getElementById('vimeo-iframe');
+      const mensagemErro = document.getElementById('mensagem-erro');
+      const loader = document.getElementById('loader');
+
+      if (!vimeoId) {
+        mensagemErro.textContent = 'Erro: ID do vídeo do Vimeo não encontrado.';
+        mensagemErro.style.display = 'block';
+        return;
+      }
+
+      if (tempoExpiracao && tempoExpiracao < agora) {
+        mensagemErro.textContent = '⚠️ Este link expirou! Solicite um novo.';
+        mensagemErro.style.display = 'block';
+        return;
+      }
+
+      // ✅ VALIDAÇÃO DO HASH
+      const linkValido = await validarHash(vimeoId, tempoExpiracao, params.key);
+      if (!linkValido) {
+        mensagemErro.textContent = '⚠️ Link inválido ou adulterado.';
+        mensagemErro.style.display = 'block';
+        return;
+      }
+
+      // ✅ Se passou em todas as validações, carrega normalmente
+      const embedURL = `https://player.vimeo.com/video/${vimeoId}?autoplay=1&title=0&byline=0&portrait=0&dnt=1&controls=1&pip=0&transparent=0&autopause=0`;
+
+      iframeElement.src = embedURL;
+
+      const player = new Vimeo.Player(iframeElement);
+
+      player.on('play', () => {
+        loader.style.display = 'none';
+        iframeElement.style.opacity = '1';
+      });
+
+      player.ready().then(() => {
+        setTimeout(() => {
+          loader.style.display = 'none';
+          iframeElement.style.opacity = '1';
+        }, 2500);
+      });
+    }
+
+    window.onload = iniciarPlayer;
+  </script>
+</body>
+</html>
