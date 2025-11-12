@@ -1,191 +1,130 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Assistir Player</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Assistir Player</title>
 
-  <style>
-    * { margin:0; padding:0; box-sizing:border-box; }
-    html, body {
-      width: 100%;
-      height: 100%;
-      background: #000;
-      overflow: hidden;
-    }
+<style>
+  * {margin:0; padding:0; box-sizing:border-box;}
+  html, body {
+    width: 100%;
+    height: 100%;
+    background: #000;
+    overflow: hidden;
+  }
 
-    #player-container {
-      position: relative;
-      width: 100vw;
-      height: 100vh;
-      background: #000;
-    }
+  #player-container {
+    position: fixed;
+    inset: 0;
+    background: #000;
+  }
 
-    iframe {
-      width: 100%;
-      height: 100%;
-      border: none;
-      background: #000;
-    }
+  iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+    display: block;
+  }
 
-    /* Sobreposição para detectar cliques */
-    #touch-layer {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      z-index: 10;
-      cursor: pointer;
-    }
+  /* Camada que esconde os controles visualmente */
+  .hide-controls iframe {
+    pointer-events: none; /* impede interação (simula sumir) */
+    opacity: 0.999; /* hack para manter o vídeo visível */
+  }
 
-    /* Barra de controles customizados (opcional) */
-    #custom-controls {
-      position: absolute;
-      bottom: 0;
-      width: 100%;
-      height: 60px;
-      background: rgba(0,0,0,0.4);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      opacity: 0;
-      transition: opacity 0.4s;
-      z-index: 20;
-    }
+  #touch-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 10;
+    background: transparent;
+  }
 
-    #custom-controls.visible {
-      opacity: 1;
-    }
-
-    #custom-controls span {
-      font-family: sans-serif;
-      color: #fff;
-      font-size: 1rem;
-      user-select: none;
-    }
-
-    #loader {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      color: #fff;
-      font-family: sans-serif;
-      font-size: 1.1rem;
-    }
-
-    #mensagem-erro {
-      color: #fff;
-      text-align: center;
-      font-family: sans-serif;
-      padding: 20px;
-      display: none;
-    }
-  </style>
+  #loader {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #fff;
+    font-family: sans-serif;
+    font-size: 1rem;
+  }
+</style>
 </head>
 <body>
 
-  <div id="player-container">
-    <div id="loader">Carregando player...</div>
-    <div id="mensagem-erro"></div>
-    <iframe id="vimeo-player" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>
-    <div id="touch-layer"></div>
-    <div id="custom-controls">
-      <span>Tocar na tela para exibir controles</span>
-    </div>
-  </div>
+<div id="player-container">
+  <div id="loader">Carregando player...</div>
+  <iframe id="vimeo-player" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>
+  <div id="touch-overlay"></div>
+</div>
 
-  <script src="https://player.vimeo.com/api/player.js"></script>
-  <script>
-    const SEGREDO = "gregoriPlay123456";
+<script src="https://player.vimeo.com/api/player.js"></script>
+<script>
+const SEGREDO = "gregoriPlay123456";
 
-    function getQueryParams() {
-      const p = new URLSearchParams(window.location.search);
-      return {
-        vimeo_id: p.get("vimeo_id"),
-        expira: p.get("expira"),
-        key: p.get("key")
-      };
-    }
+function getQueryParams() {
+  const p = new URLSearchParams(window.location.search);
+  return {
+    vimeo_id: p.get("vimeo_id"),
+    expira: p.get("expira"),
+    key: p.get("key")
+  };
+}
 
-    async function gerarHash(txt) {
-      const buf = new TextEncoder().encode(txt);
-      const hash = await crypto.subtle.digest("SHA-256", buf);
-      return [...new Uint8Array(hash)].map(b => b.toString(16).padStart(2, "0")).join("");
-    }
+async function gerarHash(txt) {
+  const buf = new TextEncoder().encode(txt);
+  const hash = await crypto.subtle.digest("SHA-256", buf);
+  return [...new Uint8Array(hash)].map(b => b.toString(16).padStart(2,"0")).join("");
+}
 
-    async function validarHash(id, expira, key) {
-      if (!key) return false;
-      const texto = `${id}|${expira}|${SEGREDO}`;
-      const correto = await gerarHash(texto);
-      return correto === key;
-    }
+async function validarHash(id, expira, key) {
+  if (!key) return false;
+  const texto = `${id}|${expira}|${SEGREDO}`;
+  const correto = await gerarHash(texto);
+  return correto === key;
+}
 
-    async function iniciar() {
-      const { vimeo_id, expira, key } = getQueryParams();
-      const agora = Date.now();
-      const msgErro = document.getElementById("mensagem-erro");
-      const loader = document.getElementById("loader");
-      const iframe = document.getElementById("vimeo-player");
-      const touchLayer = document.getElementById("touch-layer");
-      const customControls = document.getElementById("custom-controls");
+async function iniciar() {
+  const { vimeo_id, expira, key } = getQueryParams();
+  const agora = Date.now();
+  const loader = document.getElementById("loader");
+  const container = document.getElementById("player-container");
+  const overlay = document.getElementById("touch-overlay");
+  const iframe = document.getElementById("vimeo-player");
 
-      if (!vimeo_id) {
-        msgErro.textContent = "Erro: ID do vídeo não fornecido.";
-        msgErro.style.display = "block";
-        loader.style.display = "none";
-        return;
-      }
+  if (!vimeo_id) return loader.textContent = "Erro: ID não fornecido.";
+  if (expira && parseInt(expira) < agora) return loader.textContent = "⚠️ Link expirado.";
+  const ok = await validarHash(vimeo_id, expira, key);
+  if (!ok) return loader.textContent = "⚠️ Link inválido ou adulterado.";
 
-      if (expira && parseInt(expira) < agora) {
-        msgErro.textContent = "⚠️ Link expirado! Solicite um novo.";
-        msgErro.style.display = "block";
-        loader.style.display = "none";
-        return;
-      }
+  const embedURL = `https://player.vimeo.com/video/${vimeo_id}?autoplay=1&muted=0&controls=1&portrait=0&title=0&byline=0`;
+  iframe.src = embedURL;
 
-      const ok = await validarHash(vimeo_id, expira, key);
-      if (!ok) {
-        msgErro.textContent = "⚠️ Link inválido ou adulterado.";
-        msgErro.style.display = "block";
-        loader.style.display = "none";
-        return;
-      }
+  const player = new Vimeo.Player(iframe);
 
-      const embedURL = `https://player.vimeo.com/video/${vimeo_id}?autoplay=1&muted=0&controls=0&playsinline=0&portrait=0&title=0&byline=0`;
+  player.on("play", async () => {
+    loader.style.display = "none";
 
-      iframe.src = embedURL;
+    // tenta entrar em tela cheia
+    if (iframe.requestFullscreen) iframe.requestFullscreen().catch(()=>{});
 
-      const player = new Vimeo.Player(iframe);
+    // mostra controles por 4 segundos e depois esconde visualmente
+    setTimeout(() => container.classList.add("hide-controls"), 4000);
+  });
 
-      player.on('play', () => {
-        loader.style.display = 'none';
-      });
+  // se tocar na tela → reexibe controles por alguns segundos
+  overlay.addEventListener("click", () => {
+    container.classList.remove("hide-controls");
+    clearTimeout(window.hideTimeout);
+    window.hideTimeout = setTimeout(() => {
+      container.classList.add("hide-controls");
+    }, 4000);
+  });
+}
 
-      // Tocar e mostrar controles temporariamente ao toque
-      let controlsTimeout;
-      touchLayer.addEventListener("click", async () => {
-        clearTimeout(controlsTimeout);
-        customControls.classList.add("visible");
-        controlsTimeout = setTimeout(() => {
-          customControls.classList.remove("visible");
-        }, 3000);
+iniciar();
+</script>
 
-        try {
-          const volume = await player.getVolume();
-          if (volume === 0) await player.setVolume(1);
-          await player.play();
-        } catch (e) {}
-      });
-
-      // fullscreen automático (se permitido)
-      setTimeout(() => {
-        if (iframe.requestFullscreen) iframe.requestFullscreen();
-      }, 1000);
-    }
-
-    iniciar();
-  </script>
 </body>
 </html>
