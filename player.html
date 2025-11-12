@@ -17,7 +17,7 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: flex-start; /* sobe um pouco tudo */
+      justify-content: flex-start; /* sobe o conteúdo */
       min-height: 100vh;
       overflow: hidden;
       position: relative;
@@ -51,11 +51,11 @@
     .header-player .gregori { color: #fff; }
     .header-player .play { color: #1e90ff; margin-left: 3px; }
 
-    /* PLAYER AJUSTADO PARA MOBILE */
+    /* Player no mobile */
     #player-wrapper {
       position: relative;
       width: 350px;
-      height: 600px; /* reduzido só no mobile */
+      height: 600px;
       background-color: #000;
       border-radius: 20px;
       overflow: hidden;
@@ -67,10 +67,11 @@
       margin-top: 5px;
     }
 
+    /* ✅ Player no desktop restaurado */
     @media (min-width: 900px) {
       #player-wrapper {
-        width: 400px;
-        height: calc(450px * (615 / 282)); /* desktop original */
+        width: 450px;
+        height: calc(450px * (615 / 282));
         max-height: 85vh;
       }
     }
@@ -83,7 +84,7 @@
       opacity: 0;
       transition: opacity 350ms ease;
       display: block;
-      object-fit: cover;      /* cobre tudo */
+      object-fit: cover;
       transform: scale(1.05); /* elimina bordas pretas */
     }
 
