@@ -127,7 +127,7 @@
       position: fixed;
       top: 50%; left: 50%;
       transform: translate(-50%, -50%);
-      background: rgba(30,144,255,0.9);
+      background: linear-gradient(145deg, #1e90ff, #0066ff);
       color: #fff;
       border: none;
       border-radius: 50%;
@@ -141,15 +141,22 @@
       align-items: center;
       box-shadow: 0 0 25px rgba(30,144,255,0.4);
       transition: transform 0.25s ease, opacity 0.3s;
+      animation: pulse 1.5s infinite;
     }
 
     #botaoPlay:hover {
-      transform: translate(-50%, -50%) scale(1.08);
+      transform: translate(-50%, -50%) scale(1.1);
     }
 
     #botaoPlay.hide {
       opacity: 0;
       pointer-events: none;
+    }
+
+    @keyframes pulse {
+      0% { box-shadow: 0 0 20px rgba(30,144,255,0.4); }
+      50% { box-shadow: 0 0 40px rgba(30,144,255,0.7); }
+      100% { box-shadow: 0 0 20px rgba(30,144,255,0.4); }
     }
   </style>
 </head>
@@ -246,9 +253,13 @@
     }
 
     async function entrarFullscreen(element) {
-      if (element.requestFullscreen) await element.requestFullscreen();
-      else if (element.webkitRequestFullscreen) await element.webkitRequestFullscreen();
-      else if (element.msRequestFullscreen) await element.msRequestFullscreen();
+      try {
+        if (element.requestFullscreen) await element.requestFullscreen();
+        else if (element.webkitRequestFullscreen) await element.webkitRequestFullscreen();
+        else if (element.msRequestFullscreen) await element.msRequestFullscreen();
+      } catch (err) {
+        console.log("Falha ao entrar em fullscreen:", err);
+      }
     }
 
     window.onload = async () => {
@@ -258,14 +269,14 @@
 
       botao.addEventListener('click', async () => {
         botao.classList.add('hide');
-        await entrarFullscreen(iframe);
-        await player.setVolume(1);
+        await entrarFullscreen(iframe); // entra em tela cheia imediatamente
         await player.setMuted(false);
+        await player.setVolume(1);
         await player.play();
       });
 
-      // Tenta fullscreen automático (em alguns navegadores funciona)
-      entrarFullscreen(document.documentElement).catch(() => {});
+      // Tentativa discreta de fullscreen automático (nem sempre funciona, mas não quebra nada)
+      document.documentElement.requestFullscreen?.().catch(() => {});
     };
   </script>
 </body>
