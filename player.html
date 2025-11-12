@@ -122,26 +122,28 @@
       display: none;
     }
 
-    /* Botão de play */
+    /* Botão de play com imagem PNG */
     #botaoPlay {
       position: fixed;
       top: 50%; left: 50%;
       transform: translate(-50%, -50%);
-      background: linear-gradient(145deg, #1e90ff, #0066ff);
-      color: #fff;
+      background: transparent;
       border: none;
-      border-radius: 50%;
-      width: 90px;
-      height: 90px;
-      font-size: 2.5rem;
       cursor: pointer;
       z-index: 999;
+      width: 120px;
+      height: 120px;
       display: flex;
       justify-content: center;
       align-items: center;
-      box-shadow: 0 0 25px rgba(30,144,255,0.4);
       transition: transform 0.25s ease, opacity 0.3s;
       animation: pulse 1.5s infinite;
+    }
+
+    #botaoPlay img {
+      width: 100%;
+      height: auto;
+      display: block;
     }
 
     #botaoPlay:hover {
@@ -154,9 +156,9 @@
     }
 
     @keyframes pulse {
-      0% { box-shadow: 0 0 20px rgba(30,144,255,0.4); }
-      50% { box-shadow: 0 0 40px rgba(30,144,255,0.7); }
-      100% { box-shadow: 0 0 20px rgba(30,144,255,0.4); }
+      0% { transform: translate(-50%, -50%) scale(1); filter: drop-shadow(0 0 15px rgba(30,144,255,0.6)); }
+      50% { transform: translate(-50%, -50%) scale(1.05); filter: drop-shadow(0 0 30px rgba(30,144,255,0.9)); }
+      100% { transform: translate(-50%, -50%) scale(1); filter: drop-shadow(0 0 15px rgba(30,144,255,0.6)); }
     }
   </style>
 </head>
@@ -174,7 +176,10 @@
     <iframe id="vimeo-iframe" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>
   </div>
 
-  <button id="botaoPlay">▶️</button>
+  <!-- Novo botão com imagem -->
+  <button id="botaoPlay">
+    <img src="imagens/play.png" alt="Play">
+  </button>
 
   <p id="mensagem-erro" class="erro-expiracao">⚠️ Link expirado! Solicite um novo link.</p>
 
@@ -269,14 +274,11 @@
 
       botao.addEventListener('click', async () => {
         botao.classList.add('hide');
-        await entrarFullscreen(iframe); // entra em tela cheia imediatamente
+        await entrarFullscreen(iframe);
         await player.setMuted(false);
         await player.setVolume(1);
         await player.play();
       });
-
-      // Tentativa discreta de fullscreen automático (nem sempre funciona, mas não quebra nada)
-      document.documentElement.requestFullscreen?.().catch(() => {});
     };
   </script>
 </body>
