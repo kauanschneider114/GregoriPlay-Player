@@ -160,6 +160,11 @@
       50% { transform: translate(-50%, -50%) scale(1.05); filter: drop-shadow(0 0 30px rgba(30,144,255,0.9)); }
       100% { transform: translate(-50%, -50%) scale(1); filter: drop-shadow(0 0 15px rgba(30,144,255,0.6)); }
     }
+
+#loader {
+  display: none !important;
+}
+    
   </style>
 </head>
 <body>
@@ -172,6 +177,7 @@
   </div>
 
   <div id="player-wrapper">
+    <div id="loader" style="display:none;"></div>
     <iframe id="vimeo-iframe" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>
   </div>
 
@@ -282,5 +288,6 @@
   </script>
 </body>
 </html>
+
 
 
