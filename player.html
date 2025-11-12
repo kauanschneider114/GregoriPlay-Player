@@ -50,25 +50,26 @@
     .header-player .gregori { color: #fff; }
     .header-player .play { color: #1e90ff; margin-left: 3px; }
 
+    /* PLAYER RESPONSIVO 16:9 (SEM BORDAS PRETAS) */
     #player-wrapper {
       position: relative;
-      width: 320px;
-      height: 680px;
+      width: 95vw;
+      max-width: 420px;
+      aspect-ratio: 16 / 9;
       background-color: #000;
-      border-radius: 20px;
+      border-radius: 14px;
       overflow: hidden;
-      box-shadow: 0 0 60px rgba(30,144,255,0.25);
+      box-shadow: 0 0 40px rgba(30,144,255,0.25);
       display: flex;
       justify-content: center;
       align-items: center;
       z-index: 1;
+      transition: all 0.3s ease;
     }
 
     @media (min-width: 900px) {
       #player-wrapper {
-        width: 400px;
-        height: calc(450px * (615 / 282));
-        max-height: 85vh;
+        max-width: 480px;
       }
     }
 
@@ -80,6 +81,8 @@
       opacity: 0;
       transition: opacity 350ms ease;
       display: block;
+      object-fit: cover;
+      border-radius: 14px;
     }
 
     #loader {
@@ -161,12 +164,12 @@
       100% { transform: translate(-50%, -50%) scale(1); filter: drop-shadow(0 0 15px rgba(30,144,255,0.6)); }
     }
 
-#loader {
-  display: none !important;
-}
-    
+    #loader {
+      display: none !important;
+    }
   </style>
 </head>
+
 <body>
 
   <div class="bg-layer"></div>
@@ -181,7 +184,6 @@
     <iframe id="vimeo-iframe" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>
   </div>
 
-  <!-- Novo botão com imagem -->
   <button id="botaoPlay">
     <img src="play.png" alt="Play">
   </button>
@@ -288,9 +290,3 @@
   </script>
 </body>
 </html>
-
-
-
-
-
-
