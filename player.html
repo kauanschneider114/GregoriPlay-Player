@@ -50,10 +50,11 @@
     .header-player .gregori { color: #fff; }
     .header-player .play { color: #1e90ff; margin-left: 3px; }
 
+    /* 🔧 Player com altura reduzida */
     #player-wrapper {
       position: relative;
       width: 350px;
-      height: 763px;
+      height: 600px; /* era 763px → agora 600px */
       background-color: #000;
       border-radius: 20px;
       overflow: hidden;
@@ -67,12 +68,12 @@
     @media (min-width: 900px) {
       #player-wrapper {
         width: 400px;
-        height: calc(450px * (615 / 282));
+        height: 500px; /* ajustei também o desktop */
         max-height: 85vh;
       }
     }
 
-    /* 🔥 Ajuste do vídeo para eliminar bordas pretas */
+    /* vídeo ocupa tudo, sem bordas pretas */
     iframe {
       width: 100%;
       height: 100%;
@@ -81,8 +82,8 @@
       opacity: 0;
       transition: opacity 350ms ease;
       display: block;
-      object-fit: cover;     /* Preenche todo o espaço */
-      transform: scale(1.05); /* Leve zoom para esconder faixas pretas */
+      object-fit: cover;
+      transform: scale(1.05); /* leve zoom para esconder faixas pretas */
     }
 
     #loader {
@@ -125,7 +126,7 @@
       display: none;
     }
 
-    /* Botão de play com imagem PNG */
+    /* Botão de play */
     #botaoPlay {
       position: fixed;
       top: 50%; left: 50%;
@@ -183,7 +184,6 @@
     <iframe id="vimeo-iframe" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>
   </div>
 
-  <!-- Botão de play -->
   <button id="botaoPlay">
     <img src="play.png" alt="Play">
   </button>
