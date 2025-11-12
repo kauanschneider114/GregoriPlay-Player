@@ -39,34 +39,35 @@
     }
 
     .header-player {
-      font-family: 'Poppins', sans-serif;
-      font-size: 1.8rem;
-      font-weight: 700;
-      margin-bottom: 18px;
-      text-align: center;
-    }
+    font-family: 'Poppins', sans-serif;
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin-bottom: 18px;
+    text-align: center;
+}
 
-    .header-player .gregori {
-      color: #ffffff;
-      text-shadow:
+.header-player .gregori {
+    color: #ffffff;
+    text-shadow:
         0 0 3px rgba(255,255,255,0.2),
         0 0 6px rgba(255,255,255,0.15);
-    }
+}
 
-    .header-player .play {
-      color: #1e90ff;
-      margin-left: 3px;
-      text-shadow:
+.header-player .play {
+    color: #1e90ff;
+    margin-left: 3px;
+    text-shadow:
         0 0 3px rgba(30,144,255,0.3),
         0 0 8px rgba(30,144,255,0.20);
-    }
+}
 
-    @media (max-width: 480px) {
-      .header-player {
+/* Ajuste mobile */
+@media (max-width: 480px) {
+    .header-player {
         font-size: 1.4rem;
         margin-bottom: 12px;
-      }
     }
+}
 
     #player-wrapper {
       position: relative;
@@ -102,8 +103,7 @@
 
     #loader {
       position: absolute;
-      top: 50%;
-      left: 50%;
+      top: 50%; left: 50%;
       transform: translate(-50%, -50%);
       display: flex;
       flex-direction: column;
@@ -140,28 +140,8 @@
       text-align: center;
       display: none;
     }
-
-    /* Botão de áudio */
-    #unmute-button {
-      position: absolute;
-      z-index: 100;
-      background-color: #1e90ff;
-      border: none;
-      color: white;
-      font-size: 1.1rem;
-      font-weight: 600;
-      padding: 14px 24px;
-      border-radius: 10px;
-      cursor: pointer;
-      transition: background 0.3s ease;
-    }
-
-    #unmute-button:hover {
-      background-color: #3aa0ff;
-    }
   </style>
 </head>
-
 <body>
 
   <div class="bg-layer"></div>
@@ -169,19 +149,23 @@
 
   <div class="header-player">
     <span class="gregori">Gregori</span><span class="play">Play</span>
-  </div>
+</div>
 
   <div id="player-wrapper">
     <div id="loader"><span>Carregando vídeo...</span></div>
     <iframe id="vimeo-iframe" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>
-    <button id="unmute-button">Ativar Áudio 🎧</button>
   </div>
 
   <p id="mensagem-erro" class="erro-expiracao">⚠️ Link expirado! Solicite um novo link.</p>
 
   <script src="https://player.vimeo.com/api/player.js"></script>
   <script>
-    const SEGREDO = "gregoriPlay123456";
+
+    // ======================
+    //  SEGURANÇA DO LINK
+    // ======================
+
+    const SEGREDO = "gregoriPlay123456"; // MESMO DO INDEX
 
     function getQueryParams() {
       const urlParams = new URLSearchParams(window.location.search);
@@ -206,6 +190,11 @@
       return (hashCorreto === keyRecebido);
     }
 
+
+    // ======================
+    //  PLAYER ORIGINAL
+    // ======================
+
     async function iniciarPlayer() {
       const params = getQueryParams();
       const vimeoId = params.vimeo_id;
@@ -215,7 +204,6 @@
       const iframeElement = document.getElementById('vimeo-iframe');
       const mensagemErro = document.getElementById('mensagem-erro');
       const loader = document.getElementById('loader');
-      const unmuteButton = document.getElementById('unmute-button');
 
       if (!vimeoId) {
         mensagemErro.textContent = 'Erro: ID do vídeo do Vimeo não encontrado.';
@@ -229,6 +217,7 @@
         return;
       }
 
+      // ✅ VALIDAÇÃO DO HASH
       const linkValido = await validarHash(vimeoId, tempoExpiracao, params.key);
       if (!linkValido) {
         mensagemErro.textContent = '⚠️ Link inválido ou adulterado.';
@@ -236,35 +225,23 @@
         return;
       }
 
-      const embedURL = `https://player.vimeo.com/video/${vimeoId}?autoplay=1&muted=0&controls=1&portrait=0&title=0&byline=0`;
+      // ✅ Se passou em todas as validações, carrega normalmente
+      const embedURL = `https://player.vimeo.com/video/${vimeoId}?autoplay=1&title=0&byline=0&portrait=0&dnt=1&controls=1&pip=0&transparent=0&autopause=0`;
+
       iframeElement.src = embedURL;
 
       const player = new Vimeo.Player(iframeElement);
 
-      // Quando o player estiver pronto, entra em fullscreen automaticamente
-      player.ready().then(async () => {
+      player.on('play', () => {
         loader.style.display = 'none';
         iframeElement.style.opacity = '1';
-
-        // tenta fullscreen automático
-        try {
-          if (iframeElement.requestFullscreen) {
-            await iframeElement.requestFullscreen();
-          }
-        } catch (err) {
-          console.warn("Fullscreen automático bloqueado:", err);
-        }
       });
 
-      // Botão de ativar áudio
-      unmuteButton.addEventListener("click", async () => {
-        try {
-          await player.setVolume(1);
-          await player.play();
-          unmuteButton.style.display = "none";
-        } catch (e) {
-          console.warn("Falha ao ativar som:", e);
-        }
+      player.ready().then(() => {
+        setTimeout(() => {
+          loader.style.display = 'none';
+          iframeElement.style.opacity = '1';
+        }, 2500);
       });
     }
 
