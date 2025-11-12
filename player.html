@@ -27,10 +27,10 @@
     display: block;
   }
 
-  /* Camada que esconde os controles visualmente */
-  .hide-controls iframe {
-    pointer-events: none; /* impede interação (simula sumir) */
-    opacity: 0.999; /* hack para manter o vídeo visível */
+  /* Efeito de esconder controles (transparência temporária) */
+  .dim iframe {
+    opacity: 1;
+    filter: brightness(0.99);
   }
 
   #touch-overlay {
@@ -106,19 +106,19 @@ async function iniciar() {
   player.on("play", async () => {
     loader.style.display = "none";
 
-    // tenta entrar em tela cheia
+    // tenta fullscreen automático
     if (iframe.requestFullscreen) iframe.requestFullscreen().catch(()=>{});
 
-    // mostra controles por 4 segundos e depois esconde visualmente
-    setTimeout(() => container.classList.add("hide-controls"), 4000);
+    // mostra os controles por 4s e depois diminui o brilho (efeito de sumir)
+    setTimeout(() => container.classList.add("dim"), 4000);
   });
 
-  // se tocar na tela → reexibe controles por alguns segundos
+  // se tocar na tela → mostra novamente os controles (tira efeito "dim")
   overlay.addEventListener("click", () => {
-    container.classList.remove("hide-controls");
+    container.classList.remove("dim");
     clearTimeout(window.hideTimeout);
     window.hideTimeout = setTimeout(() => {
-      container.classList.add("hide-controls");
+      container.classList.add("dim");
     }, 4000);
   });
 }
