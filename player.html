@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,11 +8,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
 
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
 
     body {
       font-family: 'Poppins', sans-serif;
@@ -39,7 +34,7 @@
     .overlay-dark {
       position: fixed;
       inset: 0;
-      background: radial-gradient(circle at center, rgba(0, 0, 0, 0.7) 0%, rgba(0, 0, 0, 0.95) 90%);
+      background: radial-gradient(circle at center, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.95) 90%);
       z-index: -2;
     }
 
@@ -53,30 +48,22 @@
 
     .header-player .gregori {
       color: #ffffff;
-      text-shadow:
-        0 0 3px rgba(255, 255, 255, 0.2),
-        0 0 6px rgba(255, 255, 255, 0.15);
+      text-shadow: 0 0 3px rgba(255,255,255,0.2),
+                   0 0 6px rgba(255,255,255,0.15);
     }
 
     .header-player .play {
       color: #1e90ff;
       margin-left: 3px;
-      text-shadow:
-        0 0 3px rgba(30, 144, 255, 0.3),
-        0 0 8px rgba(30, 144, 255, 0.20);
+      text-shadow: 0 0 3px rgba(30,144,255,0.3),
+                   0 0 8px rgba(30,144,255,0.20);
     }
 
-    /* Ajuste mobile */
     @media (max-width: 480px) {
       .header-player {
         font-size: 1.4rem;
         margin-bottom: 12px;
       }
-    }
-
-    #player-wrapper {
-      width: 300px;
-      height: 600px;
     }
 
     #player-wrapper {
@@ -86,7 +73,7 @@
       background-color: #000;
       border-radius: 20px;
       overflow: hidden;
-      box-shadow: 0 0 60px rgba(30, 144, 255, 0.25);
+      box-shadow: 0 0 60px rgba(30,144,255,0.25);
       display: flex;
       justify-content: center;
       align-items: center;
@@ -132,33 +119,51 @@
       content: "";
       width: 38px;
       height: 38px;
-      border: 3px solid rgba(255, 255, 255, 0.25);
+      border: 3px solid rgba(255,255,255,0.25);
       border-top-color: #fff;
       border-radius: 50%;
       animation: spin 1s linear infinite;
     }
 
     @keyframes spin {
-      100% {
-        transform: rotate(360deg);
-      }
+      100% { transform: rotate(360deg); }
     }
 
     .erro-expiracao {
       margin-top: 25px;
       font-size: 1.05rem;
       color: #ff5555;
-      background-color: rgba(255, 85, 85, 0.1);
+      background-color: rgba(255,85,85,0.1);
       border: 1px solid #ff5555;
       padding: 12px 18px;
       border-radius: 8px;
       text-align: center;
       display: none;
     }
+
+    /* Botão de play */
+    #play-button {
+      position: absolute;
+      z-index: 100;
+      background-color: #1e90ff;
+      border: none;
+      color: white;
+      font-size: 1.2rem;
+      font-weight: 600;
+      padding: 15px 25px;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    #play-button:hover {
+      background-color: #3aa0ff;
+    }
   </style>
 </head>
 
 <body>
+
   <div class="bg-layer"></div>
   <div class="overlay-dark"></div>
 
@@ -169,6 +174,7 @@
   <div id="player-wrapper">
     <div id="loader"><span>Carregando vídeo...</span></div>
     <iframe id="vimeo-iframe" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>
+    <button id="play-button">Assistir Agora ▶</button>
   </div>
 
   <p id="mensagem-erro" class="erro-expiracao">⚠️ Link expirado! Solicite um novo link.</p>
@@ -209,6 +215,7 @@
       const iframeElement = document.getElementById('vimeo-iframe');
       const mensagemErro = document.getElementById('mensagem-erro');
       const loader = document.getElementById('loader');
+      const playButton = document.getElementById('play-button');
 
       if (!vimeoId) {
         mensagemErro.textContent = 'Erro: ID do vídeo do Vimeo não encontrado.';
@@ -229,27 +236,37 @@
         return;
       }
 
-      const embedURL = `https://player.vimeo.com/video/${vimeoId}?autoplay=1&muted=0&playsinline=0&background=0&controls=1&portrait=0&title=0&byline=0`;
-
+      const embedURL = `https://player.vimeo.com/video/${vimeoId}?autoplay=0&muted=0&controls=1&portrait=0&title=0&byline=0`;
       iframeElement.src = embedURL;
-
       const player = new Vimeo.Player(iframeElement);
 
-      player.on('play', () => {
+      // botão manual para iniciar vídeo + fullscreen + áudio
+      playButton.addEventListener('click', async () => {
+        playButton.style.display = 'none';
         loader.style.display = 'none';
+
+        try {
+          await player.play();
+          if (iframeElement.requestFullscreen) {
+            await iframeElement.requestFullscreen();
+          }
+        } catch (e) {
+          console.warn('Erro ao iniciar vídeo:', e);
+        }
+      });
+
+      player.on('play', () => {
         iframeElement.style.opacity = '1';
       });
 
       player.ready().then(() => {
         setTimeout(() => {
           loader.style.display = 'none';
-          iframeElement.style.opacity = '1';
-        }, 2500);
+        }, 1500);
       });
     }
 
     window.onload = iniciarPlayer;
   </script>
 </body>
-
 </html>
