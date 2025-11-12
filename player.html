@@ -51,13 +51,13 @@
     .header-player .gregori { color: #fff; }
     .header-player .play { color: #1e90ff; margin-left: 3px; }
 
-    /* Player MOBILE */
+    /* Player MOBILE (aumentado levemente) */
     #player-wrapper {
       position: relative;
       width: 360px;
-      height: 640px;
+      height: 640px; /* aumentei de 600px para 640px */
       background-color: #000;
-      border-radius: 24px;
+      border-radius: 24px; /* leve aumento na curva */
       overflow: hidden;
       box-shadow: 0 0 60px rgba(30,144,255,0.25);
       display: flex;
@@ -65,7 +65,6 @@
       align-items: center;
       z-index: 1;
       margin-top: 5px;
-      transition: all 0.4s ease;
     }
 
     /* Player DESKTOP original */
@@ -83,20 +82,50 @@
       border: none;
       background: #000;
       opacity: 0;
-      transition: opacity 350ms ease, transform 0.6s ease;
+      transition: opacity 350ms ease;
       display: block;
       object-fit: cover;
       transform: scale(1.05);
     }
 
-    /* 🔥 FULLSCREEN: vídeo ocupa 100% da tela */
-    :fullscreen iframe,
-    :-webkit-full-screen iframe {
-      width: 100vw !important;
-      height: 100vh !important;
-      object-fit: cover !important;
-      transform: scale(1.18);
-      transition: transform 0.6s ease, opacity 0.6s ease;
+    #loader {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      color: #fff;
+      font-size: 1rem;
+      font-weight: 600;
+      z-index: 60;
+      pointer-events: none;
+    }
+
+    #loader::after {
+      content: "";
+      width: 38px;
+      height: 38px;
+      border: 3px solid rgba(255,255,255,0.25);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin { 100% { transform: rotate(360deg); } }
+
+    .erro-expiracao {
+      margin-top: 25px;
+      font-size: 1.05rem;
+      color: #ff5555;
+      background-color: rgba(255,85,85,0.1);
+      border: 1px solid #ff5555;
+      padding: 12px 18px;
+      border-radius: 8px;
+      text-align: center;
+      display: none;
     }
 
     #botaoPlay {
@@ -137,9 +166,9 @@
       100% { transform: translate(-50%, -50%) scale(1); filter: drop-shadow(0 0 15px rgba(30,144,255,0.6)); }
     }
 
-    #loader { display: none !important; }
-
-    @keyframes spin { 100% { transform: rotate(360deg); } }
+    #loader {
+      display: none !important;
+    }
   </style>
 </head>
 <body>
@@ -259,17 +288,6 @@
         await player.play();
       });
     };
-
-    // 🔧 Ajusta o vídeo ao entrar/sair do fullscreen
-    document.addEventListener('fullscreenchange', () => {
-      const iframe = document.getElementById('vimeo-iframe');
-      if (document.fullscreenElement) {
-        iframe.style.transition = 'transform 0.6s ease, opacity 0.6s ease';
-        iframe.style.transform = 'scale(1.18)';
-      } else {
-        iframe.style.transform = 'scale(1.05)';
-      }
-    });
   </script>
 </body>
 </html>
