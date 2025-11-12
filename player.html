@@ -79,8 +79,6 @@
       height: 600px;
     }
 
-    }
-
     #player-wrapper {
       position: relative;
       width: 350px;
@@ -177,10 +175,6 @@
 
   <script src="https://player.vimeo.com/api/player.js"></script>
   <script>
-    // ======================
-    // SEGURANÇA DO LINK
-    // ======================
-
     const SEGREDO = "gregoriPlay123456"; // MESMO DO INDEX
 
     function getQueryParams() {
@@ -201,14 +195,10 @@
 
     async function validarHash(vimeoId, expira, keyRecebido) {
       if (!keyRecebido) return false;
-      const textoHash = ${vimeoId}|${expira}|${SEGREDO};
+      const textoHash = `${vimeoId}|${expira}|${SEGREDO}`;
       const hashCorreto = await gerarHash(textoHash);
       return (hashCorreto === keyRecebido);
     }
-
-    // ======================
-    // PLAYER ORIGINAL
-    // ======================
 
     async function iniciarPlayer() {
       const params = getQueryParams();
@@ -232,7 +222,6 @@
         return;
       }
 
-      // ✅ VALIDAÇÃO DO HASH
       const linkValido = await validarHash(vimeoId, tempoExpiracao, params.key);
       if (!linkValido) {
         mensagemErro.textContent = '⚠️ Link inválido ou adulterado.';
@@ -240,8 +229,7 @@
         return;
       }
 
-      // ✅ Se passou em todas as validações, carrega normalmente
-      const embedURL = https://player.vimeo.com/video/${vimeoId}?autoplay=1&muted=0&playsinline=0&background=0&controls=1&portrait=0&title=0&byline=0;
+      const embedURL = `https://player.vimeo.com/video/${vimeoId}?autoplay=1&muted=0&playsinline=0&background=0&controls=1&portrait=0&title=0&byline=0`;
 
       iframeElement.src = embedURL;
 
