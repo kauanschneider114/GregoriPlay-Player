@@ -14,23 +14,55 @@
       overflow: hidden;
     }
 
-    iframe {
-      position: fixed;
-      inset: 0;
+    #player-container {
+      position: relative;
       width: 100vw;
       height: 100vh;
-      border: none;
-      margin: 0;
-      padding: 0;
       background: #000;
     }
 
-    #mensagem-erro {
-      color: #fff;
-      text-align: center;
+    iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      background: #000;
+    }
+
+    /* Sobreposição para detectar cliques */
+    #touch-layer {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 10;
+      cursor: pointer;
+    }
+
+    /* Barra de controles customizados (opcional) */
+    #custom-controls {
+      position: absolute;
+      bottom: 0;
+      width: 100%;
+      height: 60px;
+      background: rgba(0,0,0,0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: opacity 0.4s;
+      z-index: 20;
+    }
+
+    #custom-controls.visible {
+      opacity: 1;
+    }
+
+    #custom-controls span {
       font-family: sans-serif;
-      padding: 20px;
-      display: none;
+      color: #fff;
+      font-size: 1rem;
+      user-select: none;
     }
 
     #loader {
@@ -42,14 +74,29 @@
       font-family: sans-serif;
       font-size: 1.1rem;
     }
+
+    #mensagem-erro {
+      color: #fff;
+      text-align: center;
+      font-family: sans-serif;
+      padding: 20px;
+      display: none;
+    }
   </style>
 </head>
 <body>
 
-  <div id="loader">Carregando player...</div>
-  <div id="mensagem-erro"></div>
-  <iframe id="vimeo-player" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>
+  <div id="player-container">
+    <div id="loader">Carregando player...</div>
+    <div id="mensagem-erro"></div>
+    <iframe id="vimeo-player" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>
+    <div id="touch-layer"></div>
+    <div id="custom-controls">
+      <span>Tocar na tela para exibir controles</span>
+    </div>
+  </div>
 
+  <script src="https://player.vimeo.com/api/player.js"></script>
   <script>
     const SEGREDO = "gregoriPlay123456";
 
@@ -81,6 +128,8 @@
       const msgErro = document.getElementById("mensagem-erro");
       const loader = document.getElementById("loader");
       const iframe = document.getElementById("vimeo-player");
+      const touchLayer = document.getElementById("touch-layer");
+      const customControls = document.getElementById("custom-controls");
 
       if (!vimeo_id) {
         msgErro.textContent = "Erro: ID do vídeo não fornecido.";
@@ -104,21 +153,39 @@
         return;
       }
 
-      const embedURL = `https://player.vimeo.com/video/${vimeo_id}?autoplay=1&muted=0&playsinline=0&controls=1&portrait=0&title=0&byline=0`;
+      const embedURL = `https://player.vimeo.com/video/${vimeo_id}?autoplay=1&muted=0&controls=0&playsinline=0&portrait=0&title=0&byline=0`;
 
       iframe.src = embedURL;
-      iframe.onload = () => {
-        loader.style.display = "none";
-      };
 
-      // tenta solicitar fullscreen (alguns navegadores permitem)
+      const player = new Vimeo.Player(iframe);
+
+      player.on('play', () => {
+        loader.style.display = 'none';
+      });
+
+      // Tocar e mostrar controles temporariamente ao toque
+      let controlsTimeout;
+      touchLayer.addEventListener("click", async () => {
+        clearTimeout(controlsTimeout);
+        customControls.classList.add("visible");
+        controlsTimeout = setTimeout(() => {
+          customControls.classList.remove("visible");
+        }, 3000);
+
+        try {
+          const volume = await player.getVolume();
+          if (volume === 0) await player.setVolume(1);
+          await player.play();
+        } catch (e) {}
+      });
+
+      // fullscreen automático (se permitido)
       setTimeout(() => {
         if (iframe.requestFullscreen) iframe.requestFullscreen();
-      }, 500);
+      }, 1000);
     }
 
     iniciar();
   </script>
-
 </body>
 </html>
