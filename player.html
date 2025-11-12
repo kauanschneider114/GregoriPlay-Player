@@ -48,15 +48,17 @@
 
     .header-player .gregori {
       color: #ffffff;
-      text-shadow: 0 0 3px rgba(255,255,255,0.2),
-                   0 0 6px rgba(255,255,255,0.15);
+      text-shadow:
+        0 0 3px rgba(255,255,255,0.2),
+        0 0 6px rgba(255,255,255,0.15);
     }
 
     .header-player .play {
       color: #1e90ff;
       margin-left: 3px;
-      text-shadow: 0 0 3px rgba(30,144,255,0.3),
-                   0 0 8px rgba(30,144,255,0.20);
+      text-shadow:
+        0 0 3px rgba(30,144,255,0.3),
+        0 0 8px rgba(30,144,255,0.20);
     }
 
     @media (max-width: 480px) {
@@ -125,9 +127,7 @@
       animation: spin 1s linear infinite;
     }
 
-    @keyframes spin {
-      100% { transform: rotate(360deg); }
-    }
+    @keyframes spin { 100% { transform: rotate(360deg); } }
 
     .erro-expiracao {
       margin-top: 25px;
@@ -141,22 +141,22 @@
       display: none;
     }
 
-    /* Botão de play */
-    #play-button {
+    /* Botão de áudio */
+    #unmute-button {
       position: absolute;
       z-index: 100;
       background-color: #1e90ff;
       border: none;
       color: white;
-      font-size: 1.2rem;
+      font-size: 1.1rem;
       font-weight: 600;
-      padding: 15px 25px;
+      padding: 14px 24px;
       border-radius: 10px;
       cursor: pointer;
       transition: background 0.3s ease;
     }
 
-    #play-button:hover {
+    #unmute-button:hover {
       background-color: #3aa0ff;
     }
   </style>
@@ -174,14 +174,14 @@
   <div id="player-wrapper">
     <div id="loader"><span>Carregando vídeo...</span></div>
     <iframe id="vimeo-iframe" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>
-    <button id="play-button">Assistir Agora ▶</button>
+    <button id="unmute-button">Ativar Áudio 🎧</button>
   </div>
 
   <p id="mensagem-erro" class="erro-expiracao">⚠️ Link expirado! Solicite um novo link.</p>
 
   <script src="https://player.vimeo.com/api/player.js"></script>
   <script>
-    const SEGREDO = "gregoriPlay123456"; // MESMO DO INDEX
+    const SEGREDO = "gregoriPlay123456";
 
     function getQueryParams() {
       const urlParams = new URLSearchParams(window.location.search);
@@ -215,7 +215,7 @@
       const iframeElement = document.getElementById('vimeo-iframe');
       const mensagemErro = document.getElementById('mensagem-erro');
       const loader = document.getElementById('loader');
-      const playButton = document.getElementById('play-button');
+      const unmuteButton = document.getElementById('unmute-button');
 
       if (!vimeoId) {
         mensagemErro.textContent = 'Erro: ID do vídeo do Vimeo não encontrado.';
@@ -236,33 +236,35 @@
         return;
       }
 
-      const embedURL = `https://player.vimeo.com/video/${vimeoId}?autoplay=0&muted=0&controls=1&portrait=0&title=0&byline=0`;
+      const embedURL = `https://player.vimeo.com/video/${vimeoId}?autoplay=1&muted=0&controls=1&portrait=0&title=0&byline=0`;
       iframeElement.src = embedURL;
+
       const player = new Vimeo.Player(iframeElement);
 
-      // botão manual para iniciar vídeo + fullscreen + áudio
-      playButton.addEventListener('click', async () => {
-        playButton.style.display = 'none';
+      // Quando o player estiver pronto, entra em fullscreen automaticamente
+      player.ready().then(async () => {
         loader.style.display = 'none';
+        iframeElement.style.opacity = '1';
 
+        // tenta fullscreen automático
         try {
-          await player.play();
           if (iframeElement.requestFullscreen) {
             await iframeElement.requestFullscreen();
           }
-        } catch (e) {
-          console.warn('Erro ao iniciar vídeo:', e);
+        } catch (err) {
+          console.warn("Fullscreen automático bloqueado:", err);
         }
       });
 
-      player.on('play', () => {
-        iframeElement.style.opacity = '1';
-      });
-
-      player.ready().then(() => {
-        setTimeout(() => {
-          loader.style.display = 'none';
-        }, 1500);
+      // Botão de ativar áudio
+      unmuteButton.addEventListener("click", async () => {
+        try {
+          await player.setVolume(1);
+          await player.play();
+          unmuteButton.style.display = "none";
+        } catch (e) {
+          console.warn("Falha ao ativar som:", e);
+        }
       });
     }
 
