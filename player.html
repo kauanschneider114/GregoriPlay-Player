@@ -19,8 +19,8 @@
       align-items: center;
       justify-content: center;
       min-height: 100vh;
-      padding: 20px;
       overflow: hidden;
+      position: relative;
     }
 
     .bg-layer {
@@ -44,29 +44,11 @@
       font-weight: 700;
       margin-bottom: 18px;
       text-align: center;
+      z-index: 2;
     }
 
-    .header-player .gregori {
-      color: #ffffff;
-      text-shadow:
-        0 0 3px rgba(255,255,255,0.2),
-        0 0 6px rgba(255,255,255,0.15);
-    }
-
-    .header-player .play {
-      color: #1e90ff;
-      margin-left: 3px;
-      text-shadow:
-        0 0 3px rgba(30,144,255,0.3),
-        0 0 8px rgba(30,144,255,0.20);
-    }
-
-    @media (max-width: 480px) {
-      .header-player {
-        font-size: 1.4rem;
-        margin-bottom: 12px;
-      }
-    }
+    .header-player .gregori { color: #fff; }
+    .header-player .play { color: #1e90ff; margin-left: 3px; }
 
     #player-wrapper {
       position: relative;
@@ -79,7 +61,7 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      z-index: 5;
+      z-index: 1;
     }
 
     @media (min-width: 900px) {
@@ -139,6 +121,36 @@
       text-align: center;
       display: none;
     }
+
+    /* Botão de play */
+    #botaoPlay {
+      position: fixed;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(30,144,255,0.9);
+      color: #fff;
+      border: none;
+      border-radius: 50%;
+      width: 90px;
+      height: 90px;
+      font-size: 2.5rem;
+      cursor: pointer;
+      z-index: 999;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      box-shadow: 0 0 25px rgba(30,144,255,0.4);
+      transition: transform 0.25s ease, opacity 0.3s;
+    }
+
+    #botaoPlay:hover {
+      transform: translate(-50%, -50%) scale(1.08);
+    }
+
+    #botaoPlay.hide {
+      opacity: 0;
+      pointer-events: none;
+    }
   </style>
 </head>
 <body>
@@ -154,6 +166,8 @@
     <div id="loader"><span>Carregando vídeo...</span></div>
     <iframe id="vimeo-iframe" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>
   </div>
+
+  <button id="botaoPlay">▶️</button>
 
   <p id="mensagem-erro" class="erro-expiracao">⚠️ Link expirado! Solicite um novo link.</p>
 
@@ -213,28 +227,46 @@
         return;
       }
 
-      // ✅ Player Vimeo com som direto (sem botão)
-      const embedURL = `https://player.vimeo.com/video/${vimeoId}?autoplay=1&muted=0&background=0&controls=1&byline=0&title=0&portrait=0&autopause=0`;
+      const embedURL = `https://player.vimeo.com/video/${vimeoId}?autoplay=0&muted=0&controls=1&byline=0&title=0&portrait=0&autopause=0`;
       iframeElement.src = embedURL;
 
       const player = new Vimeo.Player(iframeElement);
-
-      player.ready().then(() => {
-        loader.style.display = 'none';
-        iframeElement.style.opacity = '1';
-        player.setVolume(1);
-        player.play().catch(() => {
-          console.warn("Som bloqueado automaticamente — não há botão, mas o usuário deve interagir.");
-        });
-      });
 
       player.on('play', () => {
         loader.style.display = 'none';
         iframeElement.style.opacity = '1';
       });
+
+      player.ready().then(() => {
+        loader.style.display = 'none';
+        iframeElement.style.opacity = '1';
+      });
+
+      return player;
     }
 
-    window.onload = iniciarPlayer;
+    async function entrarFullscreen(element) {
+      if (element.requestFullscreen) await element.requestFullscreen();
+      else if (element.webkitRequestFullscreen) await element.webkitRequestFullscreen();
+      else if (element.msRequestFullscreen) await element.msRequestFullscreen();
+    }
+
+    window.onload = async () => {
+      const player = await iniciarPlayer();
+      const botao = document.getElementById('botaoPlay');
+      const iframe = document.getElementById('vimeo-iframe');
+
+      botao.addEventListener('click', async () => {
+        botao.classList.add('hide');
+        await entrarFullscreen(iframe);
+        await player.setVolume(1);
+        await player.setMuted(false);
+        await player.play();
+      });
+
+      // Tenta fullscreen automático (em alguns navegadores funciona)
+      entrarFullscreen(document.documentElement).catch(() => {});
+    };
   </script>
 </body>
 </html>
