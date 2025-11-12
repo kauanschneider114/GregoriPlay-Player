@@ -3,57 +3,52 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Carregando player...</title>
+  <title>Assistir Player</title>
 
   <style>
     * { margin:0; padding:0; box-sizing:border-box; }
-    body {
-      background:#000;
-      color:#fff;
-      font-family:sans-serif;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      height:100vh;
-      overflow:hidden;
+    html, body {
+      width: 100%;
+      height: 100%;
+      background: #000;
+      overflow: hidden;
+    }
+
+    iframe {
+      position: fixed;
+      inset: 0;
+      width: 100vw;
+      height: 100vh;
+      border: none;
+      margin: 0;
+      padding: 0;
+      background: #000;
+    }
+
+    #mensagem-erro {
+      color: #fff;
+      text-align: center;
+      font-family: sans-serif;
+      padding: 20px;
+      display: none;
     }
 
     #loader {
-      text-align:center;
-      font-size:1.2rem;
-      font-weight:600;
-      opacity:0.85;
-    }
-
-    #loader::after {
-      content:"";
-      width:40px;
-      height:40px;
-      border:4px solid rgba(255,255,255,0.2);
-      border-top-color:#fff;
-      border-radius:50%;
-      display:block;
-      margin:20px auto;
-      animation:spin 1s linear infinite;
-    }
-
-    @keyframes spin { to { transform:rotate(360deg); } }
-
-    #mensagem-erro {
-      display:none;
-      padding:15px;
-      text-align:center;
-      background:rgba(255,50,50,0.15);
-      border:1px solid #ff4444;
-      border-radius:8px;
-      font-size:1rem;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: #fff;
+      font-family: sans-serif;
+      font-size: 1.1rem;
     }
   </style>
 </head>
 <body>
 
-  <div id="loader">Validando link...</div>
+  <div id="loader">Carregando player...</div>
   <div id="mensagem-erro"></div>
+  <iframe id="vimeo-player" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>
 
   <script>
     const SEGREDO = "gregoriPlay123456";
@@ -70,7 +65,7 @@
     async function gerarHash(txt) {
       const buf = new TextEncoder().encode(txt);
       const hash = await crypto.subtle.digest("SHA-256", buf);
-      return [...new Uint8Array(hash)].map(b => b.toString(16).padStart(2,"0")).join("");
+      return [...new Uint8Array(hash)].map(b => b.toString(16).padStart(2, "0")).join("");
     }
 
     async function validarHash(id, expira, key) {
@@ -85,6 +80,7 @@
       const agora = Date.now();
       const msgErro = document.getElementById("mensagem-erro");
       const loader = document.getElementById("loader");
+      const iframe = document.getElementById("vimeo-player");
 
       if (!vimeo_id) {
         msgErro.textContent = "Erro: ID do vídeo não fornecido.";
@@ -108,15 +104,17 @@
         return;
       }
 
-      // ✅ URL Direta do Vimeo (permite áudio automático no Android)
-      const embedURL = `https://player.vimeo.com/video/${vimeo_id}?autoplay=1&muted=0&playsinline=0&title=0&byline=0&portrait=0`;
+      const embedURL = `https://player.vimeo.com/video/${vimeo_id}?autoplay=1&muted=0&playsinline=0&controls=1&portrait=0&title=0&byline=0`;
 
-      loader.textContent = "Abrindo player...";
-      
-      // ✅ Redireciona diretamente (SEM IFRAME)
+      iframe.src = embedURL;
+      iframe.onload = () => {
+        loader.style.display = "none";
+      };
+
+      // tenta solicitar fullscreen (alguns navegadores permitem)
       setTimeout(() => {
-        window.location.replace(embedURL);
-      }, 300);
+        if (iframe.requestFullscreen) iframe.requestFullscreen();
+      }, 500);
     }
 
     iniciar();
