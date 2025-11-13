@@ -259,7 +259,7 @@
         return;
       }
 
-      const embedURL = `https://player.vimeo.com/video/${vimeoId}?autoplay=0&muted=0&controls=1&byline=0&title=0&portrait=0&autopause=0`;
+      const embedURL = `https://player.vimeo.com/video/${vimeoId}?autoplay=1&muted=1&controls=1&byline=0&title=0&portrait=0&autopause=0`;
       iframeElement.src = embedURL;
 
       const player = new Vimeo.Player(iframeElement);
@@ -325,6 +325,7 @@ async function entrarFullscreen(element) {
   </script>
 </body>
 </html>
+
 
 
 
