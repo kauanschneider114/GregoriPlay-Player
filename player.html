@@ -278,61 +278,53 @@
     }
 
 async function entrarFullscreen(element) {
-      try {
-        if (element.requestFullscreen) await element.requestFullscreen();
-        else if (element.webkitRequestFullscreen) await element.webkitRequestFullscreen();
-        else if (element.msRequestFullscreen) await element.msRequestFullscreen();
-      } catch (err) {
-        console.log("Falha ao entrar em fullscreen:", err);
-      }
-    }
 
-    window.onload = async () => {
-      const player = await iniciarPlayer();
-      const botaoPlay = document.getElementById('botaoPlay');
-      const botaoFullscreen = document.getElementById('botaoFullscreen');
-      const iframe = document.getElementById('vimeo-iframe');
-      const playerWrapper = document.getElementById('player-wrapper');
+      try {
 
-      // --- 1. Ação do Botão Play (Inicia Áudio + Vídeo Inline) ---
-      botaoPlay.addEventListener('click', async () => {
-        botaoPlay.classList.add('hide');
+        if (element.requestFullscreen) await element.requestFullscreen();
 
-        // 1. Toca no iOS, permitindo ÁUDIO
-        await player.setMuted(false); 
-        await player.setVolume(1);
-        await player.play(); 
-        
-        // 2. Exibe o botão Fullscreen (Opção 1: Customizado)
-        botaoFullscreen.style.display = 'block';
+        else if (element.webkitRequestFullscreen) await element.webkitRequestFullscreen();
 
-        // OU (Opção 2): Confie no ícone nativo do Vimeo (controles do Vimeo precisam estar visíveis)
-        // Se você não quiser o botão customizado, confie no ícone nativo do Vimeo.
-      });
-      
-      // --- 2. Ação do Botão Fullscreen (Entra em Tela Cheia) ---
-      botaoFullscreen.addEventListener('click', async () => {
-          // O segundo clique aciona o Fullscreen com áudio já ativo
-          await entrarFullscreen(playerWrapper); 
-          // Oculta o botão customizado após o clique
-          botaoFullscreen.style.display = 'none'; 
+        else if (element.msRequestFullscreen) await element.msRequestFullscreen();
+
+      } catch (err) {
+
+        console.log("Falha ao entrar em fullscreen:", err);
+
+      }
+
+    }
+
+
+
+    window.onload = async () => {
+
+      const player = await iniciarPlayer();
+
+      const botao = document.getElementById('botaoPlay');
+
+      const iframe = document.getElementById('vimeo-iframe');
+
+
+
+      botao.addEventListener('click', async () => {
+
+        botao.classList.add('hide');
+
+        await entrarFullscreen(iframe);
+
+        await player.setMuted(false);
+
+        await player.setVolume(1);
+
+        await player.play();
+
       });
-      
-      // Opcional: Adiciona um listener para sair do fullscreen e mostrar o botão novamente
-      document.addEventListener('fullscreenchange', () => {
-          if (!document.fullscreenElement) {
-              // Se saiu do Fullscreen e o botão Play não está visível
-              if (botaoPlay.classList.contains('hide')) {
-                  // Mostra o botão Fullscreen novamente, se o vídeo estiver ativo
-                  botaoFullscreen.style.display = 'block';
-              }
-          }
-      });
-      document.addEventListener('webkitfullscreenchange', () => { /* Repetir a lógica acima */ });
 
-    };
+    };
   </script>
 </body>
 </html>
+
 
 
