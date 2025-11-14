@@ -181,6 +181,13 @@
     #loader {
       display: none !important;
     }
+    
+    @supports (-webkit-touch-callout: none) {
+  #player-wrapper {
+    margin-bottom: 40px !important; /* sobe o player para não ficar atrás da barra do Safari */
+    height: 600px !important;       /* reduz um pouco a altura só no iPhone */
+  }
+}
   </style>
 </head>
 <body>
@@ -325,6 +332,7 @@ async function entrarFullscreen(element) {
   </script>
 </body>
 </html>
+
 
 
 
