@@ -269,17 +269,14 @@
         return;
       }
 
-     const LIB_ID = "SUA_LIBRARY_ID";   // <-- coloque seu Library ID do Bunny aqui
-const videoId = vimeoId;           // reaproveitando o parâmetro da URL
+     const LIB_ID = ".";
+const videoId = vimeoId;
 const embedURL = `https://iframe.mediadelivery.net/embed/${LIB_ID}/${videoId}`;
-
-// define o vídeo no iframe
+
 iframeElement.src = embedURL + "?autoplay=1";
 
-// como não existe Bunny Player JS igual ao do Vimeo,
-// removemos o player = new Vimeo.Player, e usamos só o iframe:
 const player = {
-  play: () => {},     // não é necessário, autoplay já resolve
+  play: () => {},
   setMuted: () => {},
   setVolume: () => {}
 };
