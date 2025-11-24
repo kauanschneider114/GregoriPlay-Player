@@ -281,15 +281,10 @@ const player = {
   setVolume: () => {}
 };
 
-      player.on('play', () => {
-        loader.style.display = 'none';
-        iframeElement.style.opacity = '1';
-      });
+      iframeElement.addEventListener('load', () => {
+    iframeElement.style.opacity = '1';
+});
 
-      player.ready().then(() => {
-        loader.style.display = 'none';
-        iframeElement.style.opacity = '1';
-      });
 
       return player;
     }
