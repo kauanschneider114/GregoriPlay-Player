@@ -214,6 +214,7 @@
 
   <p id="mensagem-erro" class="erro-expiracao">⚠️ Link expirado! Solicite um novo link.</p>
 
+  <script src="https://player.vimeo.com/api/player.js"></script>
   <script>
     const SEGREDO = "gregoriPlay123456";
 
@@ -269,22 +270,20 @@
         return;
       }
 
-     const LIB_ID = ".";
-const videoId = vimeoId;
-const embedURL = `https://iframe.mediadelivery.net/embed/${LIB_ID}/${videoId}`;
-
-iframeElement.src = embedURL + "?autoplay=1";
+      const embedURL = `https://player.vimeo.com/video/${vimeoId}?autoplay=1&muted=1&controls=1&byline=0&title=0&portrait=0&autopause=0`;
+      iframeElement.src = embedURL;
 
-const player = {
-  play: () => {},
-  setMuted: () => {},
-  setVolume: () => {}
-};
+      const player = new Vimeo.Player(iframeElement);
 
-      iframeElement.addEventListener('load', () => {
-    iframeElement.style.opacity = '1';
-});
+      player.on('play', () => {
+        loader.style.display = 'none';
+        iframeElement.style.opacity = '1';
+      });
 
+      player.ready().then(() => {
+        loader.style.display = 'none';
+        iframeElement.style.opacity = '1';
+      });
 
       return player;
     }
@@ -337,8 +336,6 @@ async function entrarFullscreen(element) {
   </script>
 </body>
 </html>
-
-
 
 
 
