@@ -44,6 +44,7 @@
       border: none;
       opacity: 0;
       transition: opacity .3s ease;
+      background: #000;
     }
 
     #botaoPlay {
@@ -63,15 +64,15 @@
       animation: pulse 1.5s infinite;
     }
 
+    #botaoPlay.hide {
+      opacity: 0;
+      pointer-events: none;
+    }
+
     @keyframes pulse {
       0% { transform: scale(1); }
       50% { transform: scale(1.07); }
       100% { transform: scale(1); }
-    }
-
-    #botaoPlay.hide {
-      opacity: 0;
-      pointer-events: none;
     }
 
     .erro {
@@ -80,11 +81,11 @@
       display: none;
       align-items: center;
       justify-content: center;
+      background: rgba(0,0,0,.9);
       color: #ff5555;
       font-size: 1.1rem;
-      background: rgba(0,0,0,.9);
-      z-index: 20;
       text-align: center;
+      z-index: 20;
       padding: 20px;
     }
   </style>
@@ -103,12 +104,15 @@
 <div id="erro" class="erro"></div>
 
 <script>
+  /* ===== CONFIGURAÇÃO ===== */
   const SEGREDO = "gregoriPlay123456";
+  const LIBRARY_ID = "566755";
 
-  function qs() {
-    const p = new URLSearchParams(location.search);
+  /* ===== HELPERS ===== */
+  function getParams() {
+    const p = new URLSearchParams(window.location.search);
     return {
-      vimeo_id: p.get("vimeo_id"),
+      videoId: p.get("vimeo_id"),
       expira: parseInt(p.get("expira")),
       key: p.get("key")
     };
@@ -117,41 +121,48 @@
   async function sha256(text) {
     const data = new TextEncoder().encode(text);
     const hash = await crypto.subtle.digest("SHA-256", data);
-    return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2,"0")).join("");
+    return Array.from(new Uint8Array(hash))
+      .map(b => b.toString(16).padStart(2,"0"))
+      .join("");
   }
 
-  async function validar(id, exp, key) {
+  async function validar(videoId, expira, key) {
     if (!key) return false;
-    const correto = await sha256(${id}|${exp}|${SEGREDO});
+    const correto = await sha256(`${videoId}|${expira}|${SEGREDO}`);
     return correto === key;
   }
 
-  async function iniciar() {
-    const { vimeo_id, expira, key } = qs();
+  async function entrarFullscreen(el) {
+    if (el.requestFullscreen) await el.requestFullscreen();
+    else if (el.webkitRequestFullscreen) await el.webkitRequestFullscreen();
+  }
+
+  /* ===== PLAYER ===== */
+  async function iniciarPlayer() {
+    const { videoId, expira, key } = getParams();
     const erro = document.getElementById("erro");
     const iframe = document.getElementById("playerFrame");
 
-    if (!vimeo_id) {
+    if (!videoId) {
       erro.textContent = "Vídeo não encontrado.";
       erro.style.display = "flex";
-      return null;
+      return false;
     }
 
     if (expira && Date.now() > expira) {
       erro.textContent = "⚠️ Link expirado. Solicite um novo.";
       erro.style.display = "flex";
-      return null;
+      return false;
     }
 
-    if (!(await validar(vimeo_id, expira, key))) {
+    const valido = await validar(videoId, expira, key);
+    if (!valido) {
       erro.textContent = "⚠️ Link inválido.";
       erro.style.display = "flex";
-      return null;
+      return false;
     }
 
-    const LIB_ID = "https://dash.bunny.net/stream/566755/library/overview#noscroll";
-
-    iframe.src = https://iframe.mediadelivery.net/embed/${LIB_ID}/${vimeo_id}?autoplay=1;
+    iframe.src = `https://iframe.mediadelivery.net/embed/${LIBRARY_ID}/${videoId}?autoplay=1`;
 
     iframe.addEventListener("load", () => {
       iframe.style.opacity = "1";
@@ -160,20 +171,16 @@
     return true;
   }
 
-  async function entrarFullscreen(el) {
-    if (el.requestFullscreen) await el.requestFullscreen();
-    else if (el.webkitRequestFullscreen) await el.webkitRequestFullscreen();
-  }
-
+  /* ===== INIT ===== */
   window.onload = async () => {
-    const ok = await iniciar();
+    const ok = await iniciarPlayer();
     if (!ok) return;
 
-    const btn = document.getElementById("botaoPlay");
+    const botao = document.getElementById("botaoPlay");
     const iframe = document.getElementById("playerFrame");
 
-    btn.addEventListener("click", async () => {
-      btn.classList.add("hide");
+    botao.addEventListener("click", async () => {
+      botao.classList.add("hide");
       await entrarFullscreen(iframe);
     });
   };
@@ -181,4 +188,3 @@
 
 </body>
 </html>
-
