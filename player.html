@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title id="page-title">Assistir | Doramas VIP</title>
+  <title>Assistir | Doramas VIP</title>
 
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
 
@@ -14,69 +14,27 @@
       font-family: 'Poppins', sans-serif;
       background: #000;
       color: #fff;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: flex-start;
       min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       overflow: hidden;
-      position: relative;
-      padding-top: 30px;
     }
 
-    .bg-layer {
-      position: fixed;
-      inset: 0;
-      background: url('imagens/bg-dorama.jpg') center/cover no-repeat fixed;
-      filter: brightness(0.25) blur(3px);
-      z-index: -3;
-    }
-
-    .overlay-dark {
-      position: fixed;
-      inset: 0;
-      background: radial-gradient(circle at center, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.95) 90%);
-      z-index: -2;
-    }
-
-    .header-player {
-      font-family: 'Poppins', sans-serif;
-      font-size: 1.8rem;
-      font-weight: 700;
-      margin-bottom: 15px;
-      text-align: center;
-      z-index: 2;
-    }
-
-    .header-player {
-  display: none !important;
-}
-
-    .header-player .gregori { color: #fff; }
-    .header-player .play { color: #1e90ff; margin-left: 3px; }
-
-    /* Player MOBILE (aumentado levemente) */
     #player-wrapper {
       position: relative;
       width: 360px;
-      height: 640px; /* aumentei de 600px para 640px */
-      background-color: #000;
-      border-radius: 24px; /* leve aumento na curva */
+      height: 640px;
+      background: #000;
+      border-radius: 24px;
       overflow: hidden;
       box-shadow: 0 0 60px rgba(30,144,255,0.25);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      z-index: 1;
-      margin-top: 5px;
     }
 
-    /* Player DESKTOP original */
     @media (min-width: 900px) {
       #player-wrapper {
         width: 450px;
         height: calc(450px * (615 / 282));
-        max-height: 85vh;
       }
     }
 
@@ -84,91 +42,31 @@
       width: 100%;
       height: 100%;
       border: none;
-      background: #000;
       opacity: 0;
-      transition: opacity 350ms ease;
-      display: block;
-      object-fit: cover;
-      transform: scale(1.05);
+      transition: opacity .3s ease;
     }
-
-    #loader {
-      position: absolute;
-      top: 50%; left: 50%;
-      transform: translate(-50%, -50%);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      color: #fff;
-      font-size: 1rem;
-      font-weight: 600;
-      z-index: 60;
-      pointer-events: none;
-    }
-
-    #loader::after {
-      content: "";
-      width: 38px;
-      height: 38px;
-      border: 3px solid rgba(255,255,255,0.25);
-      border-top-color: #fff;
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-    }
-
-    @keyframes spin { 100% { transform: rotate(360deg); } }
-
-    .erro-expiracao {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  font-size: 1.1rem;
-  color: #ff5555;
-  background-color: rgba(255, 85, 85, 0.15);
-  border: 1px solid #ff5555;
-  padding: 14px 22px;
-  border-radius: 10px;
-  text-align: center;
-  display: none;
-  z-index: 9999;
-  box-shadow: 0 0 20px rgba(255, 85, 85, 0.3);
-  backdrop-filter: blur(5px);
-  animation: fadeIn 0.4s ease forwards;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: translate(-50%, -40%); }
-  to { opacity: 1; transform: translate(-50%, -50%); }
-}
 
     #botaoPlay {
       position: fixed;
-      top: 50%; left: 50%;
-      transform: translate(-50%, -50%);
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       background: transparent;
       border: none;
       cursor: pointer;
-      z-index: 999;
-      width: 120px;
-      height: 120px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      transition: transform 0.25s ease, opacity 0.3s;
-      animation: pulse 1.5s infinite;
+      z-index: 10;
     }
 
     #botaoPlay img {
-      width: 100%;
-      height: auto;
-      display: block;
+      width: 120px;
+      animation: pulse 1.5s infinite;
     }
 
-    #botaoPlay:hover {
-      transform: translate(-50%, -50%) scale(1.1);
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.07); }
+      100% { transform: scale(1); }
     }
 
     #botaoPlay.hide {
@@ -176,168 +74,110 @@
       pointer-events: none;
     }
 
-    @keyframes pulse {
-      0% { transform: translate(-50%, -50%) scale(1); filter: drop-shadow(0 0 15px rgba(30,144,255,0.6)); }
-      50% { transform: translate(-50%, -50%) scale(1.05); filter: drop-shadow(0 0 30px rgba(30,144,255,0.9)); }
-      100% { transform: translate(-50%, -50%) scale(1); filter: drop-shadow(0 0 15px rgba(30,144,255,0.6)); }
+    .erro {
+      position: fixed;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      color: #ff5555;
+      font-size: 1.1rem;
+      background: rgba(0,0,0,.9);
+      z-index: 20;
+      text-align: center;
+      padding: 20px;
     }
-
-    #loader {
-      display: none !important;
-    }
-    
-    @supports (-webkit-touch-callout: none) {
-  #player-wrapper {
-    margin-bottom: 40px !important; /* sobe o player para não ficar atrás da barra do Safari */
-    height: 600px !important;       /* reduz um pouco a altura só no iPhone */
-  }
-}
   </style>
 </head>
+
 <body>
 
-  <div class="bg-layer"></div>
-  <div class="overlay-dark"></div>
+<div id="player-wrapper">
+  <iframe id="playerFrame" allow="autoplay; fullscreen" allowfullscreen></iframe>
+</div>
 
-  <div class="header-player">
-    <span class="gregori">Gregori</span><span class="play">Play</span>
-  </div>
+<button id="botaoPlay">
+  <img src="play.png" alt="Play">
+</button>
 
-  <div id="player-wrapper">
-    <div id="loader" style="display:none;"></div>
-    <iframe id="vimeo-iframe" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>
-  </div>
+<div id="erro" class="erro"></div>
 
-  <button id="botaoPlay">
-    <img src="play.png" alt="Play">
-  </button>
+<script>
+  const SEGREDO = "gregoriPlay123456";
 
-  <p id="mensagem-erro" class="erro-expiracao">⚠️ Link expirado! Solicite um novo link.</p>
-
-  <script src="https://player.vimeo.com/api/player.js"></script>
-  <script>
-    const SEGREDO = "gregoriPlay123456";
-
-    function getQueryParams() {
-      const urlParams = new URLSearchParams(window.location.search);
-      return {
-        vimeo_id: urlParams.get('vimeo_id'),
-        expira: urlParams.get('expira'),
-        key: urlParams.get('key')
-      };
-    }
-
-    async function gerarHash(texto) {
-      const msgBuffer = new TextEncoder().encode(texto);
-      const hashBuffer = await crypto.subtle.digest("SHA-256", msgBuffer);
-      const hashArray = Array.from(new Uint8Array(hashBuffer));
-      return hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
-    }
-
-    async function validarHash(vimeoId, expira, keyRecebido) {
-      if (!keyRecebido) return false;
-      const textoHash = `${vimeoId}|${expira}|${SEGREDO}`;
-      const hashCorreto = await gerarHash(textoHash);
-      return (hashCorreto === keyRecebido);
-    }
-
-    async function iniciarPlayer() {
-      const params = getQueryParams();
-      const vimeoId = params.vimeo_id;
-      const tempoExpiracao = parseInt(params.expira);
-      const agora = Date.now();
-
-      const iframeElement = document.getElementById('vimeo-iframe');
-      const mensagemErro = document.getElementById('mensagem-erro');
-      const loader = document.getElementById('loader');
-
-      if (!vimeoId) {
-        mensagemErro.textContent = 'Erro: ID do vídeo do Vimeo não encontrado.';
-        mensagemErro.style.display = 'block';
-        return;
-      }
-
-      if (tempoExpiracao && tempoExpiracao < agora) {
-        mensagemErro.textContent = '⚠️ Este link expirou! Solicite um novo.';
-        mensagemErro.style.display = 'block';
-        return;
-      }
-
-      const linkValido = await validarHash(vimeoId, tempoExpiracao, params.key);
-      if (!linkValido) {
-        mensagemErro.textContent = '⚠️ Link inválido ou adulterado.';
-        mensagemErro.style.display = 'block';
-        return;
-      }
-
-      const embedURL = `https://player.vimeo.com/video/${vimeoId}?autoplay=1&muted=1&controls=1&byline=0&title=0&portrait=0&autopause=0`;
-      iframeElement.src = embedURL;
-
-      const player = new Vimeo.Player(iframeElement);
-
-      player.on('play', () => {
-        loader.style.display = 'none';
-        iframeElement.style.opacity = '1';
-      });
-
-      player.ready().then(() => {
-        loader.style.display = 'none';
-        iframeElement.style.opacity = '1';
-      });
-
-      return player;
-    }
-
-async function entrarFullscreen(element) {
-
-      try {
-
-        if (element.requestFullscreen) await element.requestFullscreen();
-
-        else if (element.webkitRequestFullscreen) await element.webkitRequestFullscreen();
-
-        else if (element.msRequestFullscreen) await element.msRequestFullscreen();
-
-      } catch (err) {
-
-        console.log("Falha ao entrar em fullscreen:", err);
-
-      }
-
-    }
-
-
-
-    window.onload = async () => {
-
-      const player = await iniciarPlayer();
-
-      const botao = document.getElementById('botaoPlay');
-
-      const iframe = document.getElementById('vimeo-iframe');
-
-
-
-      botao.addEventListener('click', async () => {
-
-        botao.classList.add('hide');
-
-        await entrarFullscreen(iframe);
-
-        await player.setMuted(false);
-
-        await player.setVolume(1);
-
-        await player.play();
-
-      });
-
+  function qs() {
+    const p = new URLSearchParams(location.search);
+    return {
+      vimeo_id: p.get("vimeo_id"),
+      expira: parseInt(p.get("expira")),
+      key: p.get("key")
     };
-  </script>
+  }
+
+  async function sha256(text) {
+    const data = new TextEncoder().encode(text);
+    const hash = await crypto.subtle.digest("SHA-256", data);
+    return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2,"0")).join("");
+  }
+
+  async function validar(id, exp, key) {
+    if (!key) return false;
+    const correto = await sha256(${id}|${exp}|${SEGREDO});
+    return correto === key;
+  }
+
+  async function iniciar() {
+    const { vimeo_id, expira, key } = qs();
+    const erro = document.getElementById("erro");
+    const iframe = document.getElementById("playerFrame");
+
+    if (!vimeo_id) {
+      erro.textContent = "Vídeo não encontrado.";
+      erro.style.display = "flex";
+      return null;
+    }
+
+    if (expira && Date.now() > expira) {
+      erro.textContent = "⚠️ Link expirado. Solicite um novo.";
+      erro.style.display = "flex";
+      return null;
+    }
+
+    if (!(await validar(vimeo_id, expira, key))) {
+      erro.textContent = "⚠️ Link inválido.";
+      erro.style.display = "flex";
+      return null;
+    }
+
+    const LIB_ID = "566755";
+
+    iframe.src = https://iframe.mediadelivery.net/embed/${LIB_ID}/${vimeo_id}?autoplay=1;
+
+    iframe.addEventListener("load", () => {
+      iframe.style.opacity = "1";
+    });
+
+    return true;
+  }
+
+  async function entrarFullscreen(el) {
+    if (el.requestFullscreen) await el.requestFullscreen();
+    else if (el.webkitRequestFullscreen) await el.webkitRequestFullscreen();
+  }
+
+  window.onload = async () => {
+    const ok = await iniciar();
+    if (!ok) return;
+
+    const btn = document.getElementById("botaoPlay");
+    const iframe = document.getElementById("playerFrame");
+
+    btn.addEventListener("click", async () => {
+      btn.classList.add("hide");
+      await entrarFullscreen(iframe);
+    });
+  };
+</script>
+
 </body>
 </html>
-
-
-
-
-
